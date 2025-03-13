@@ -13,12 +13,17 @@ A full-feature messenger clone built with React and Firebase
 
 Official Website: [https://fireverse.pages.dev](https://fireverse.pages.dev)
 
+## Android App
+
+This project now supports Android! See [ANDROID_README.md](ANDROID_README.md) for instructions on building and deploying the Android app.
+
 ## Main technology used
 
 - react, typescript, tailwind
 - firebase (auth, firestore, storage)
 - zustand
 - emoji-mart
+- capacitor (for Android app)
 
 ## Features
 

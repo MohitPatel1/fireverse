@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Fireverse</string>
+    <string name="title_activity_main">Fireverse</string>
+    <string name="package_name">com.fireverse.app</string>
+    <string name="custom_url_scheme">com.fireverse.app</string>
+</resources>
