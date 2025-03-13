@@ -16,19 +16,25 @@ const App: FC = () => {
   const setCurrentUser = useStore((state) => state.setCurrentUser);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-          phoneNumber: user.phoneNumber || user.providerData?.[0]?.phoneNumber,
-        });
-      } else setCurrentUser(null);
+        try {
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            phoneNumber: user.phoneNumber || user.providerData?.[0]?.phoneNumber,
+          });
+        } catch (error) {
+          console.error("Error writing user document:", error);
+        }
+      } else {
+        setCurrentUser(null);
+      }
     });
-  }, []);
+  }, [setCurrentUser]);
 
   if (typeof currentUser === "undefined")
     return (

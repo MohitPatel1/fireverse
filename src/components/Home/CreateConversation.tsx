@@ -24,6 +24,7 @@ const CreateConversation: FC<CreateConversationProps> = ({ setIsOpened }) => {
     "all-users",
     collection(db, "users")
   );
+  console.log("data", data);
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -33,52 +34,71 @@ const CreateConversation: FC<CreateConversationProps> = ({ setIsOpened }) => {
 
   const navigate = useNavigate();
 
-  const handleToggle = (uid: string) => {
-    if (selected.includes(uid)) {
-      setSelected(selected.filter((item) => item !== uid));
+  const handleToggle = (id: string) => {
+    console.log("id", id);
+    if (selected.includes(id)) {
+      setSelected(selected.filter((item) => item !== id));
     } else {
-      setSelected([...selected, uid]);
+      setSelected([...selected, id]);
     }
   };
 
   const handleCreateConversation = async () => {
     setIsCreating(true);
-
-    const sorted = [...selected, currentUser?.uid].sort();
-
-    const q = query(
-      collection(db, "conversations"),
-      where("users", "==", sorted)
-    );
-
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      const created = await addDoc(collection(db, "conversations"), {
-        users: sorted,
-        group:
-          sorted.length > 2
-            ? {
-                admins: [currentUser?.uid],
-                groupName: null,
-                groupImage: null,
-              }
-            : {},
-        updatedAt: serverTimestamp(),
-        seen: {},
-        theme: THEMES[0],
-      });
-
+  
+    if (!currentUser?.uid) {
+      console.error("User is not authenticated.");
       setIsCreating(false);
+      return;
+    }
+  
+    const sorted = [...selected, currentUser.uid]
+      .filter((uid) => uid !== undefined)
+      .sort();
+  
+    console.log("sorted", sorted);
+  
+    try {
+      const q = query(collection(db, "conversations"), where("users", "==", sorted));
+      const querySnapshot = await getDocs(q);
+  
+      console.log("querySnapshot", querySnapshot);
+      console.log("currentUser", THEMES);
+  
+      if (querySnapshot.empty) {
+        try {
+          const created = await addDoc(collection(db, "conversations"), {
+            users: sorted,
+            group:
+              sorted.length > 2
+                ? {
+                    admins: [currentUser.uid],
+                    groupName: null,
+                    groupImage: null,
+                  }
+                : {},
+            updatedAt: serverTimestamp(),
+            seen: {},
+            theme: "default",
+          });
 
-      setIsOpened(false);
-
-      navigate(`/${created.id}`);
-    } else {
-      setIsOpened(false);
-
-      navigate(`/${querySnapshot.docs[0].id}`);
-
+          alert("Conversation created successfully");
+  
+          setIsCreating(false);
+          setIsOpened(false);
+          navigate(`/${created.id}`);
+        } catch (error) {
+          console.error("Error creating conversation:", error);
+          setIsCreating(false);
+        }
+      } else {
+        console.log("querySnapshot.docs[0].id", querySnapshot.docs[0].id);
+        setIsOpened(false);
+        navigate(`/${querySnapshot.docs[0].id}`);
+        setIsCreating(false);
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
       setIsCreating(false);
     }
   };
@@ -124,6 +144,7 @@ const CreateConversation: FC<CreateConversationProps> = ({ setIsOpened }) => {
               </div>
             )}
             <div className="flex h-96 flex-col items-stretch gap-2 overflow-y-auto py-2">
+              {data?.docs.map((doc) => console.log("data", doc.data()))}
               {data?.docs
                 .filter((doc) => doc.data().uid !== currentUser?.uid)
                 .map((doc) => (
