@@ -1,0 +1,52 @@
+---
+description: Codebase standards. general rules
+globs: *.*
+---
+# Project Name
+Project: FireVerse
+
+# Key Directories
+src/
+src/components/
+src/pages/
+src/shared/
+
+# Key Files
+src/App.tsx
+src/store.ts
+src/shared/firebase.ts
+src/shared/constants.ts
+
+# Navigation Rules
+- Use `useStore` for state management.
+- Firebase authentication and Firestore are initialized in `src/shared/firebase.ts`.
+- Main routes are defined in `src/App.tsx`.
+- Components are organized under `src/components/`.
+
+# Guidelines
+- Use `React.memo` for components that receive props to prevent unnecessary rerenders.
+- Use `useCallback` and `useMemo` to memoize functions and values that are passed as props.
+- Ensure all components are functional components using TypeScript.
+- Follow the BEM naming convention for CSS classes.
+- Use `IMAGE_PROXY` for all image URLs to ensure consistent image handling.
+
+# Performance Tips
+- Avoid inline functions and objects in JSX to prevent unnecessary rerenders.
+- Use `useEffect` dependencies wisely to avoid infinite loops.
+- Optimize Firebase queries to minimize data fetching.
+
+# Context Usage
+- Use context sparingly and only for global state that truly needs to be shared across many components.
+- Consider lifting state up or using props for more localized state management.
+
+# Additional Notes
+- Ensure all API keys and sensitive information are stored securely and not hardcoded in the source files. 
+
+# Libraries
+- Use `react-hook-form` for form handling.
+- Use `zod` for schema validation.
+- Use `react-router-dom` for routing.
+- Use `capacitor-firebase/authentication` for authentication.
+- Use `capacitor-firebase/firestore` for database.
+- Use `react-icons` for icons.
+- Use `react-toastify` for notifications.

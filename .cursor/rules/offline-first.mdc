@@ -1,0 +1,8 @@
+---
+description: Offline first pwa that works in native app whlie converting into android / ios build
+globs: *.*
+---
+
+# Make offline first
+
+Offline first pwa that works in native app whlie converting into android / ios build

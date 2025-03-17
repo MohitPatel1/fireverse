@@ -1,0 +1,8 @@
+---
+description: firebase
+globs: *.tsx
+---
+use firebase for authentication and messaging.
+Use capacitor-firebase library for authentication.
+
+https://www.npmjs.com/package/@capacitor-firebase/authentication
