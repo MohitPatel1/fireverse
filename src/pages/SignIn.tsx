@@ -1,6 +1,8 @@
 import {
   AuthProvider,
   GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from "firebase/auth";
 import { FC, useState } from "react";
 
@@ -16,6 +18,23 @@ const signInWithGoogle = async () => {
   return result.user;
 };
 
+const signUpWithEmail = async (email: string, password: string) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error: any) {
+    throw new Error(`Sign Up Error: ${error.message}`);
+  }
+};
+
+const signInWithEmail = async (email: string, password: string) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    throw new Error(`Sign In Error: ${(error as Error).message}`);
+  }
+};
 
 const SignIn: FC = () => {
   const { redirect } = useQueryParams();
@@ -26,6 +45,9 @@ const SignIn: FC = () => {
   const [error, setError] = useState("");
   const [isAlertOpened, setIsAlertOpened] = useState(false);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleSignIn = async () => {
     setLoading(true);
 
@@ -34,7 +56,33 @@ const SignIn: FC = () => {
       console.log(user);
     } catch (error) {
       setIsAlertOpened(true);
-      setError(`Error: ${error}`);
+      setError(`Error: ${(error as Error).message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async () => {
+    setLoading(true);
+    try {
+      const user = await signUpWithEmail(email, password);
+      console.log(user);
+    } catch (error) {
+      setIsAlertOpened(true);
+      setError((error as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSignIn = async () => {
+    setLoading(true);
+    try {
+      const user = await signInWithEmail(email, password);
+      console.log(user);
+    } catch (error) {
+      setIsAlertOpened(true);
+      setError((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -67,13 +115,43 @@ const SignIn: FC = () => {
                 close to your favourite people.
               </p>
 
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="mb-2 p-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mb-2 p-2 border rounded"
+              />
+
+              <button
+                disabled={loading}
+                onClick={handleEmailSignIn}
+                className="flex min-w-[250px] cursor-pointer items-center gap-3 rounded-md bg-white p-3 text-black transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
+              >
+                <span>Sign In With Email</span>
+              </button>
+
+              <button
+                disabled={loading}
+                onClick={handleEmailSignUp}
+                className="flex min-w-[250px] cursor-pointer items-center gap-3 rounded-md bg-white p-3 text-black transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
+              >
+                <span>Sign Up With Email</span>
+              </button>
+
               <button
                 disabled={loading}
                 onClick={handleSignIn}
                 className="flex min-w-[250px] cursor-pointer items-center gap-3 rounded-md bg-white p-3 text-black transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
               >
                 <img className="h-6 w-6" src="/google.svg" alt="" />
-
                 <span>Sign In With Google</span>
               </button>
             </div>
