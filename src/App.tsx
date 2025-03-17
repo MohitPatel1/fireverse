@@ -1,7 +1,7 @@
 import { FC, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { auth, db } from "./shared/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 import BarWave from "react-cssfx-loading/src/BarWave";
 import Chat from "./pages/Chat";
@@ -20,15 +20,17 @@ const App: FC = () => {
       if (user) {
         setCurrentUser(user);
         try {
-          await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            phoneNumber: user.phoneNumber || user.providerData?.[0]?.phoneNumber,
-          });
+          // Get user data
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          
+          if (!userDoc.exists()) {
+            // If no user document exists, sign out
+            // This shouldn't happen normally, but handles edge cases
+            await auth.signOut();
+            setCurrentUser(null);
+          }
         } catch (error) {
-          console.error("Error writing user document:", error);
+          console.error("Error fetching user document:", error);
         }
       } else {
         setCurrentUser(null);

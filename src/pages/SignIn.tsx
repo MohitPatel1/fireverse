@@ -1,40 +1,72 @@
-import {
-  AuthProvider,
-  FacebookAuthProvider,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
-import { FC, useState } from "react";
-
-import Alert from "../components/Alert";
+import { signInAnonymously } from "firebase/auth";
+import { type FC, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { auth } from "../shared/firebase";
+import Alert from "../components/Alert";
+import { auth, db } from "../shared/firebase";
 import { useQueryParams } from "../hooks/useQueryParams";
 import { useStore } from "../store";
+import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
 
 const SignIn: FC = () => {
   const { redirect } = useQueryParams();
-
   const currentUser = useStore((state) => state.currentUser);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAlertOpened, setIsAlertOpened] = useState(false);
+  const [username, setUsername] = useState("");
 
-  const handleSignIn = (provider: AuthProvider) => {
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
+    setError("");
 
-    signInWithPopup(auth, provider)
-      .then((res) => {
-        console.log(res.user);
-      })
-      .catch((err) => {
-        setIsAlertOpened(true);
-        setError(`Error: ${err.code}`);
-      })
-      .finally(() => {
-        setLoading(false);
+    try {
+      // Validate username
+      if (username.length < 3) {
+        throw new Error("Username must be at least 3 characters long");
+      }
+      if (username.length > 20) {
+        throw new Error("Username must be at most 20 characters long");
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        throw new Error("Username can only contain letters, numbers, and underscores");
+      }
+
+      const normalizedUsername = username.toLowerCase();
+
+      // Check if username exists
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", "==", normalizedUsername));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        throw new Error("Username is already taken. Please choose another one.");
+      }
+
+      // Sign in anonymously
+      const { user } = await signInAnonymously(auth);
+
+      // Create new user profile
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        username: normalizedUsername,
+        displayName: username,
+        photoURL: null,
+        phoneNumber: null,
+        createdAt: new Date().toISOString()
       });
+
+    } catch (err: unknown) {
+      setIsAlertOpened(true);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (currentUser) return <Navigate to={redirect || "/"} />;
@@ -57,22 +89,29 @@ const SignIn: FC = () => {
 
             <div className="mt-12 flex flex-1 flex-col items-center gap-4 md:items-start lg:mt-24">
               <h1 className="text-center text-3xl md:text-left md:text-4xl">
-                The best place for messaging
+                Choose your username
               </h1>
               <p className="text-center text-xl md:text-left md:text-2xl">
-                It's free, fast and secure. We make it easy and fun to stay
-                close to your favourite people.
+                Enter a unique username to start chatting with your friends.
               </p>
 
-              <button
-                disabled={loading}
-                onClick={() => handleSignIn(new GoogleAuthProvider())}
-                className="flex min-w-[250px] cursor-pointer items-center gap-3 rounded-md bg-white p-3 text-black transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
-              >
-                <img className="h-6 w-6" src="/google.svg" alt="" />
-
-                <span>Sign In With Google</span>
-              </button>
+              <form onSubmit={handleSignIn} className="flex w-full max-w-[400px] flex-col gap-4">
+                <input
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="w-full rounded-md bg-dark-lighten px-4 py-3 text-white outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex min-w-[250px] cursor-pointer items-center justify-center gap-3 rounded-md bg-primary p-3 text-white transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
+                >
+                  {loading ? "Creating account..." : "Create Account"}
+                </button>
+              </form>
             </div>
           </div>
         </div>
