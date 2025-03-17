@@ -1,8 +1,6 @@
 import {
   AuthProvider,
-  FacebookAuthProvider,
   GoogleAuthProvider,
-  signInWithPopup,
 } from "firebase/auth";
 import { FC, useState } from "react";
 
@@ -11,6 +9,13 @@ import { Navigate } from "react-router-dom";
 import { auth } from "../shared/firebase";
 import { useQueryParams } from "../hooks/useQueryParams";
 import { useStore } from "../store";
+import { FirebaseAuthentication } from "@capacitor-firebase/authentication";
+
+const signInWithGoogle = async () => {
+  const result = await FirebaseAuthentication.signInWithGoogle();
+  return result.user;
+};
+
 
 const SignIn: FC = () => {
   const { redirect } = useQueryParams();
@@ -21,20 +26,18 @@ const SignIn: FC = () => {
   const [error, setError] = useState("");
   const [isAlertOpened, setIsAlertOpened] = useState(false);
 
-  const handleSignIn = (provider: AuthProvider) => {
+  const handleSignIn = async () => {
     setLoading(true);
 
-    signInWithPopup(auth, provider)
-      .then((res) => {
-        console.log(res.user);
-      })
-      .catch((err) => {
-        setIsAlertOpened(true);
-        setError(`Error: ${err.code}`);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      const user = await signInWithGoogle();
+      console.log(user);
+    } catch (error) {
+      setIsAlertOpened(true);
+      setError(`Error: ${error}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (currentUser) return <Navigate to={redirect || "/"} />;
@@ -66,7 +69,7 @@ const SignIn: FC = () => {
 
               <button
                 disabled={loading}
-                onClick={() => handleSignIn(new GoogleAuthProvider())}
+                onClick={handleSignIn}
                 className="flex min-w-[250px] cursor-pointer items-center gap-3 rounded-md bg-white p-3 text-black transition duration-300 hover:brightness-90 disabled:!cursor-default disabled:!brightness-75"
               >
                 <img className="h-6 w-6" src="/google.svg" alt="" />
