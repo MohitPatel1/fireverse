@@ -2,7 +2,103 @@
 description: Offline first pwa that works in native app whlie converting into android / ios build
 globs: *.*
 ---
+Implement network status detection with:
 
-# Make offline first
+typescript
+Copy
+const [isOnline, setIsOnline] = useState(navigator.onLine);
+// Add event listeners for online/offline
+Use Capacitor plugins for:
 
-Offline first pwa that works in native app whlie converting into android / ios build
+Network status detection
+
+Native notifications
+
+Splash screen management
+
+UI/UX Requirements:
+
+Visual offline indicator
+
+Message queue status display
+
+Local-first message rendering
+
+Optimistic UI updates
+
+Error handling for failed syncs
+
+Security Rules:
+
+Firebase rules should allow temporary offline writes
+
+Implement message validation schema
+
+Use Firestore security rules with timestamp validation
+
+Conflict Resolution:
+
+Use Firestore server timestamps for message ordering
+
+Implement version field for documents
+
+Last-write-win strategy with client timestamp fallback
+
+Testing Requirements:
+
+Simulate offline scenarios
+
+Test message persistence across app restarts
+
+Verify native app performance
+
+Validate cross-device sync consistency
+
+Performance:
+
+Lighthouse PWA score >90
+
+First meaningful paint <2s
+
+Cache-first strategy for static assets
+
+Lazy load non-essential components
+
+Exception Handling:
+
+Queue failed operations
+
+Retry logic with exponential backoff
+
+Local error logging
+
+Sync status reporting
+
+Native App Specifics:
+
+Configure capacitor.config.ts for:
+
+iOS/Android build settings
+
+Custom URL scheme
+
+Background sync configuration
+
+Implement capacitor-community plugins for:
+
+Network status
+
+Secure storage
+
+Biometric authentication
+
+Do Not:
+
+Use third-party chat SDKs
+
+Implement custom database solutions
+
+Block UI during sync operations
+
+Store sensitive data in localStorage
+
