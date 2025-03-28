@@ -1,15 +1,15 @@
-const CACHE_NAME = 'chat-app-cache-v2';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/static/js/bundle.js',
-  // Add other assets here
-];
+const CACHE_NAME = 'chat-app-cache-v3';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        return cache.addAll([
+          '/',
+          '/index.html',
+          // Add other static assets here if needed
+        ]);
+      })
   );
 });
 
