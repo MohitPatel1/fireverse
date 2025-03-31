@@ -97,7 +97,7 @@ const SignIn: FC = () => {
           <div className="flex justify-between">
             <div className="flex items-center gap-2">
               <img className="h-8 w-8" src="/icon.svg" alt="" />
-              <span className="text-2xl">FireVerse</span>
+              <span className="text-2xl">Catta Chetti</span>
             </div>            
           </div>
 

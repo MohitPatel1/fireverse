@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 
 ReactDOM.render(
   <BrowserRouter>
+    Hello
     <App />
   </BrowserRouter>,
   document.getElementById("root")
